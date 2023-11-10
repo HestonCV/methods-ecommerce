@@ -30,7 +30,8 @@ class Menu:
         pages = {
             'initial_page': self.initial_page,
             'login': self.login_page,
-            'register': self.register_page
+            'register': self.register_page,
+            'main_menu': self.main_menu_page
         }
         active_page = self.nav_stack[-1]
         pages[active_page]()
@@ -116,9 +117,15 @@ class Menu:
             if not password:
                 return
             
+            # Check database
             print(f'Login successful. Welcome, {username}.')
+
+            self.forward('main_menu')
             
             # Move to main menu page
+    
+    def main_menu_page(self):
+        print('This is the main menu.')
     
     def register_page(self):
         print('Register Page')
