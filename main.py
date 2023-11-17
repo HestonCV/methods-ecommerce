@@ -1,3 +1,5 @@
+from cart import Cart, create_cart_database
+from user import User, create_user_database
 # Before Login:            # After Login (Main Menu):
 # ● Login                  # ● Logout
 # ● Create Account         # ● View Account Information
@@ -13,7 +15,10 @@
 
 
 class Menu:
-    def __init__(self):
+    def __init__(self, user, cart): # add inventory
+        self.user = user
+        self.cart = cart
+        # self.inventory = inventory
         self.nav_stack = ['initial_page']
         self.render_active_page()
     
@@ -26,6 +31,17 @@ class Menu:
         self.nav_stack.append(page)
         self.render_active_page()
     
+    def render_page_header(self):
+        print('\n|-------------------------')
+        if len(self.nav_stack) > 1:
+            print('|(B/b) -> Back')
+            return
+        
+        if self.nav_stack[0] == 'initial_page':
+            print('|(X/x) -> Quit')
+
+
+    
     def render_active_page(self):
         pages = {
             'initial_page': self.initial_page,
@@ -37,26 +53,30 @@ class Menu:
         pages[active_page]()
     
     def initial_page(self):
-        print('\n|-------------------------')
+        self.render_page_header()
         print('|----- 1. Login')
         print('|----- 2. Register')
-        selection = int(input('|- Enter your selection: '))
+        
+        while True:
+            selection = input('|- Enter your selection: ')
+            # If register page was selected
+            if selection == '1':
+                self.forward('login')
+                return
+            elif selection == '2': # if login page was selected
+                self.forward('register')
+                return
+            elif selection == 'X' or selection == 'x':
+                return
+            else:
+                print('|----- Invalid Selection.')
 
-        # If register page was selected
-        if selection == 2:
-            self.forward('register')
-            return
-        else: # if login page was selected
-            self.forward('login')
-            return
 
     def login_page(self):
-            
+
+            # Validates username and checks for back selection 
             def enter_username():
-                print('\n|-------------------------')
-                print('|(B/b) -> Back')
                 username = input('|- Enter your username: ')
-                valid_user = False # check database for username
 
                 # If user chooses back
                 if username == 'B' or username == 'b':
@@ -64,72 +84,94 @@ class Menu:
                     return False
                 
                 # Loop while user enters invalid username
-                while not valid_user:
-                    print('\n|-------------------------')
-                    print('|(B/b) -> Back')
-                    print('|----- User does not exist.')
+                while len(username) < 4:
+                    self.render_page_header()
+                    print('|----- Username is too short.')
                     username = input('|- Enter your username: ').strip()
 
                     # If user chooses back
                     if username == 'B' or username == 'b':
                         self.back()
                         return False
-
-                    valid_user = True # check database for username
                 
                 return username
             
+            # Validates password and checks for back selection 
             def enter_password():
-                print('\n|-------------------------')
-                print('|(B/b) -> Back')
+                # print('\n|-------------------------')
+                # print('|(B/b) -> Back')
                 password = input('|- Enter your password: ')
 
-                valid_password = False # check database for password match
-                
                 # If user chooses back
                 if password == 'B' or password == 'b':
                     self.back()
                     return False
 
                 # Loop while user enters invalid password
-                while not valid_password:
-                    print('\n|-------------------------')
-                    print('|(B/b) -> Back')
-                    print('|----- Invalid password.')
+                while len(password) < 4:
+                    print('|----- Password is too short.')
                     password = input('|- Enter your password: ')
 
                     # If user chooses back
                     if password == 'B' or password == 'b':
                         self.back()
                         return False
-                    
-                    valid_password = True # check database for password match
                 
                 return password
-
+            
+            self.render_page_header()
             username = enter_username()
-
+            # if user chose back
             if not username:
                 return
             
             password = enter_password()
-
+            # if user chose back
             if not password:
                 return
             
-            # Check database
-            print(f'Login successful. Welcome, {username}.')
+            while not self.user.logged_in:
+                self.render_page_header()
 
+                if self.user.login(username, password):
+                    break
+
+                username = enter_username()
+                # if user chose back
+                if not username:
+                    return
+                
+                password = enter_password()
+
+                # if user chose back
+                if not password:
+                    return
+                
+                self.user.login(username, password)
+                
             self.forward('main_menu')
-            
-            # Move to main menu page
     
     def main_menu_page(self):
-        print('This is the main menu.')
+        print('This is the Main Menu.')
     
     def register_page(self):
-        print('Register Page')
+        print('This is the Register Page.')
+
+def create_database(database_name, user_table_name, cart_table_name, inventory_table_name):
+    create_user_database(database_name, user_table_name)
+    create_cart_database(database_name, cart_table_name)
+    # create_inventory_database(database_name, inventory_table_name)
 
 
 if __name__ == '__main__':
-    menu = Menu()
+    database_name = 'ecommerce_database.db'
+    user_table_name = 'user'
+    cart_table_name = 'cart'
+    inventory_table_name = 'inventory'
+
+    create_database(database_name, user_table_name, cart_table_name, inventory_table_name)
+    
+    user = User(database_name, user_table_name)
+    cart = Cart(database_name, cart_table_name)
+
+    menu = Menu(user, cart)
