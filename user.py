@@ -31,7 +31,7 @@ class User:
         # password = input("Enter your password: ")
 
         # Implement SQL query to check if the username and password match
-        self.cursor.execute(f"SELECT * FROM {self.table_name} WHERE username=? AND password=?", (username, password))
+        self.cursor.execute("SELECT * FROM {} WHERE username=? AND password=?".format(self.table_name), (username, password))
         user = self.cursor.fetchone()
         
         if user:
