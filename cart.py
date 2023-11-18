@@ -16,49 +16,55 @@ class Cart:
         self.conn = sqlite3.connect(self.database_name)
         self.cursor = self.conn.cursor()
     
-    # def view_cart(self, user_id, inventory_database):
-    #     # ISBN *
-    #     # Title
-    #     # Author
-    #     # Genre
-    #     # Pages
-    #     # ReleaseDate
-    #     # Stock
-    #     query = "SELECT isbn, quantity FROM {} WHERE user_id=?".format(self.table_name)
-    #     self.cursor.execute(query, (user_id,))
-    #     # Get each item's quantity and isbn
-    #     items_in_cart = self.cursor.fetchall()
+    def view_cart(self, user_id, inventory_table_name):
+        # ISBN *
+        # Title
+        # Author
+        # Genre
+        # Pages
+        # ReleaseDate
+        # Stock
+        query = "SELECT isbn, quantity FROM {} WHERE user_id=?".format(self.table_name)
+        self.cursor.execute(query, (user_id,))
+        # Get each item's quantity and isbn
+        items_in_cart = self.cursor.fetchall()
 
-    #     isbns = [item[0] for item in items_in_cart]
-    #     quantities = [item[1] for item in items_in_cart]
+        # Initialize empty to false
+        empty = False
 
-    #     isbn_tuple = tuple(isbns)
+        # Unpack isbns and quantites from items in cart
+        isbns = [item[0] for item in items_in_cart]
+        quantities = [item[1] for item in items_in_cart]
 
-    #     if len(isbn_tuple) == 1:
-    #         query = "SELECT * FROM {} WHERE isbn IN {}".format('inventory', isbn_tuple,)
+        if isbns:
+            # Join isbns for use in query
+            placeholders = ', '.join('?' for _ in isbns)
 
+            # Fetch book details from the inventory for each isbn
+            query = "SELECT * FROM {} WHERE isbn IN ({})".format(inventory_table_name, placeholders)
+            self.cursor.execute(query, isbns)
+            books = self.cursor.fetchall()
 
-    #     query = "SELECT * FROM {} WHERE isbn IN {}".format('inventory', isbn_tuple)
-    #     self.cursor.execute(query, (isbn, ))
-    #     books = self.cursor.fetchall()
+            titles = [book[1] for book in books]
+            authors = [book[2] for book in books]
+            genres = [book[3] for book in books]
+            pages = [book[4] for book in books]
+            release_dates = [book[5] for book in books]
 
-    #     titles = [book[1] for book in books]
-    #     authors = [book[2] for book in books]
-    #     genres = [book[3] for book in books]
-    #     pages = [book[4] for book in books]
-    #     release_date = [book[4] for book in books]
-
-    #     for isbn in isbns:
-
-    #      titles.append
-
-
-    #     query = "SELECT * FROM {} WHERE isbn=?".format('inventory')
-    #     self.cursor.execute(query, (,))
-
-
-    #     book = []
-
+        else:
+            empty = True
+            titles, authors, genres, pages, release_dates = [], [], [], [], []
+        
+        return {
+            'empty': empty,
+            'isbns': isbns,
+            'quantities': quantities,
+            'titles': titles,
+            'authors': authors,
+            'genres': genres,
+            'pages': pages,
+            'release_dates': release_dates
+        }
 
 
     def add_to_cart(self, user_id, isbn): 

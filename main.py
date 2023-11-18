@@ -39,6 +39,12 @@ class Menu:
         
         if self.nav_stack[0] == 'initial_page':
             print('|(X/x) -> Quit')
+            return
+        
+        if self.nav_stack[0] == 'main_menu':
+            print('|(B/b) -> Logout')
+            return
+
 
 
     
@@ -53,17 +59,21 @@ class Menu:
         pages[active_page]()
     
     def initial_page(self):
+
+        # render page
         self.render_page_header()
         print('|----- 1. Login')
         print('|----- 2. Register')
         
+        # Get selection
         while True:
             selection = input('|- Enter your selection: ')
             # If register page was selected
             if selection == '1':
                 self.forward('login')
                 return
-            elif selection == '2': # if login page was selected
+            # if login page was selected
+            elif selection == '2': 
                 self.forward('register')
                 return
             elif selection == 'X' or selection == 'x':
