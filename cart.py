@@ -17,13 +17,7 @@ class Cart:
         self.cursor = self.conn.cursor()
     
     def view_cart(self, user_id, inventory_table_name):
-        # ISBN *
-        # Title
-        # Author
-        # Genre
-        # Pages
-        # ReleaseDate
-        # Stock
+
         query = "SELECT isbn, quantity FROM {} WHERE user_id=?".format(self.table_name)
         self.cursor.execute(query, (user_id,))
         # Get each item's quantity and isbn
@@ -98,21 +92,26 @@ class Cart:
 
     def remove_from_cart(self, user_id, isbn):
         '''
-            Because quantity is not specified, this method removes
-            the item from the db regardless of quantity
+            Because quantity is not specified, this method decrements quantity
+            of the item. If the new quantity is 0, it deletes the item from the
+            cart.
         '''
-
         # Get item from cart
         self.cursor.execute("SELECT quantity FROM {} WHERE isbn=? AND user_id=?".format(self.table_name), (isbn, user_id))
         item_in_cart = self.cursor.fetchone()
 
         if item_in_cart:
-            
-            # Delete entry from cart
-            delete_query = "DELETE FROM {} WHERE user_id=? AND isbn=?".format(self.table_name)
-            self.execute(delete_query, (user_id, isbn))
-            self.conn.commit()
-            return True
+            new_quantity = item_in_cart[0] - 1
+
+            if new_quantity > 0:
+                update_query = "UPDATE {} SET quantity=? WHERE user_id=? AND isbn=?".format(self.table_name)
+                self.cursor.execute(update_query, (new_quantity, user_id, isbn))
+            else:
+                # Delete entry from cart
+                delete_query = "DELETE FROM {} WHERE user_id=? AND isbn=?".format(self.table_name)
+                self.execute(delete_query, (user_id, isbn))
+                self.conn.commit()
+                return True
         else:
             return False
 
