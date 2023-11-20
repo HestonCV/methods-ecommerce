@@ -17,7 +17,14 @@ class Cart:
         self.cursor = self.conn.cursor()
     
     def view_cart(self, user_id, inventory_table_name):
+        '''
+            Returns all books in the logged in User’s cart.
+            Please note: this cooperates with the inventory database to display all the
+            correct information on the inventory items
 
+            ** Does not display the books. It returns the information for the UI/Menu
+            to display. **
+        '''
         query = "SELECT isbn, quantity FROM {} WHERE user_id=?".format(self.table_name)
         self.cursor.execute(query, (user_id,))
         # Get each item's quantity and isbn
@@ -62,13 +69,16 @@ class Cart:
 
 
     def add_to_cart(self, user_id, isbn): 
-
+        '''
+            Once user selects a book, this ISBN is used to add an item to
+            the appropriate cart
+        '''
         # Get item with matching isbn and stock > 0 from inventory
         self.cursor.execute("SELECT stock FROM {} WHERE isbn=? AND stock>?".format('inventory'), (isbn, 0))
         
         item_in_inventory = self.cursor.fetchone()
 
-        if item_in_inventory:
+        if item_in_inventory and item_in_inventory[0] > 0:
             # Check if item is already in the cart
             self.cursor.execute("SELECT quantity FROM {} WHERE isbn=? AND user_id=?".format(self.table_name), (isbn, user_id))
             item_in_cart = self.cursor.fetchone()
@@ -92,9 +102,12 @@ class Cart:
 
     def remove_from_cart(self, user_id, isbn):
         '''
-            Because quantity is not specified, this method decrements quantity
+            Once user selects a book to remove, this ISBN is used to
+            remove an item from the user’s cart
+
+            ** Because quantity is not specified, this method decrements quantity
             of the item. If the new quantity is 0, it deletes the item from the
-            cart.
+            cart. **
         '''
         # Get item from cart
         self.cursor.execute("SELECT quantity FROM {} WHERE isbn=? AND user_id=?".format(self.table_name), (isbn, user_id))
@@ -109,14 +122,38 @@ class Cart:
             else:
                 # Delete entry from cart
                 delete_query = "DELETE FROM {} WHERE user_id=? AND isbn=?".format(self.table_name)
-                self.execute(delete_query, (user_id, isbn))
-                self.conn.commit()
-                return True
+                self.cursor.execute(delete_query, (user_id, isbn))
+            
+            self.conn.commit()
+            return True
         else:
             return False
 
     def check_out(self, user_id):
-        pass
+        '''
+            this removes all their cart items. It also
+            calls the Inventory class function to decrease the stock of the books by the correct
+            amount the user bought (prior to removing them from the cart)
+        '''
+        query = 'SELECT isbn, quantity FROM {} WHERE user_id=? AND quantity>0'.format(self.table_name)
+        self.cursor.execute(query, user_id)
+
+        items = self.cursor.fetchall()
+
+        if items:
+            for item in items:
+                isbn = item[0]
+                quantity = item[1]
+                #inventory.decrease_stock(isbn, quantity)
+                delete_query = 'DELETE FROM {} WHERE isbn=? and user_id=?'.format(self.table_name)
+                self.cursor.execute(delete_query, isbn, user_id)
+                self.conn.commit()
+
+                return True
+        else: 
+            return False
+
+
 
 
 def create_cart_database(database_name, table_name):

@@ -181,6 +181,7 @@ if __name__ == '__main__':
 
     create_database(database_name, user_table_name, cart_table_name, inventory_table_name)
     
+    #inventory = Inventory(database_name, inventory_table_name)
     user = User(database_name, user_table_name)
     cart = Cart(database_name, cart_table_name)
 
