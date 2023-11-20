@@ -23,149 +23,158 @@ class Menu:
         self.render_active_page()
     
     def back(self):
-        # Remove page from top of stack and render the new active_page
+        # Remove page from top of stack and render the new active page
         self.nav_stack.pop()
         self.render_active_page()
     
     def forward(self, page):
+        # Add page to top of stack and render the new active page
         self.nav_stack.append(page)
         self.render_active_page()
     
-    def render_page_header(self):
-        print('\n|-------------------------')
+    def render_page_header(self, header_message=''):
+        
+        if header_message:
+            header_message = '- ' + header_message
+
+        print(f'\nCongo {header_message}')
+        print('|-------------------------')
+
+        if self.nav_stack[-1] == 'initial_page':
+            print('|(X/x) -> Quit')
+            return
+        
+        if self.nav_stack[-1] == 'main_menu':
+            return
+        
         if len(self.nav_stack) > 1:
             print('|(B/b) -> Back')
             return
         
-        if self.nav_stack[0] == 'initial_page':
-            print('|(X/x) -> Quit')
-            return
-        
-        if self.nav_stack[0] == 'main_menu':
-            print('|(B/b) -> Logout')
-            return
-
-
-
     
     def render_active_page(self):
+        # Define pages
         pages = {
             'initial_page': self.initial_page,
             'login': self.login_page,
             'register': self.register_page,
-            'main_menu': self.main_menu_page
+            'main_menu': self.main_menu_page,
+            'account_info': self.account_info_page,
+            'for_sale': self.for_sale_page,
+            'cart': self.cart_page
         }
+        # Render page from top of stack
         active_page = self.nav_stack[-1]
         pages[active_page]()
     
     def initial_page(self):
+        
+        # Process input from user
+        def process_selection():
 
-        # render page
-        self.render_page_header()
+            while True:
+                selection = input('|- Enter your selection: ')
+                # If register page was selected
+                if selection == '1':
+                    self.forward('login')
+                    return
+                # if login page was selected
+                elif selection == '2': 
+                    self.forward('register')
+                    return
+                elif selection == 'X' or selection == 'x':
+                    return
+                else:
+                    print('|----- Invalid Selection.')
+
+        # Render Initial Page UI
+        self.render_page_header(header_message="Welcome")
         print('|----- 1. Login')
         print('|----- 2. Register')
+        process_selection()
         
-        # Get selection
-        while True:
-            selection = input('|- Enter your selection: ')
-            # If register page was selected
-            if selection == '1':
-                self.forward('login')
-                return
-            # if login page was selected
-            elif selection == '2': 
-                self.forward('register')
-                return
-            elif selection == 'X' or selection == 'x':
-                return
-            else:
-                print('|----- Invalid Selection.')
-
-
     def login_page(self):
-
-            # Validates username and checks for back selection 
-            def enter_username():
-                username = input('|- Enter your username: ')
-
-                # If user chooses back
-                if username == 'B' or username == 'b':
-                    self.back()
-                    return False
-                
-                # Loop while user enters invalid username
-                while len(username) < 4:
-                    self.render_page_header()
-                    print('|----- Username is too short.')
-                    username = input('|- Enter your username: ').strip()
-
-                    # If user chooses back
-                    if username == 'B' or username == 'b':
-                        self.back()
-                        return False
-                
-                return username
-            
-            # Validates password and checks for back selection 
-            def enter_password():
-                # print('\n|-------------------------')
-                # print('|(B/b) -> Back')
-                password = input('|- Enter your password: ')
+        def enter_credentials(credential_type):
+            while True:
+                credential = input(f'|- Enter your {credential_type}: ').strip()
 
                 # If user chooses back
-                if password == 'B' or password == 'b':
+                if credential.lower() == 'b':
                     self.back()
-                    return False
+                    return None
 
-                # Loop while user enters invalid password
-                while len(password) < 4:
-                    print('|----- Password is too short.')
-                    password = input('|- Enter your password: ')
+                # Check if credential is too short
+                if len(credential) < 4:
+                    print(f'|----- {credential_type.capitalize()} is too short.')
+                    continue
 
-                    # If user chooses back
-                    if password == 'B' or password == 'b':
-                        self.back()
-                        return False
-                
-                return password
-            
-            self.render_page_header()
-            username = enter_username()
-            # if user chose back
+                return credential
+
+        def attempt_login():
+            username = enter_credentials('username')
             if not username:
-                return
-            
-            password = enter_password()
-            # if user chose back
+                return False
+
+            password = enter_credentials('password')
             if not password:
-                return
-            
-            while not self.user.logged_in:
-                self.render_page_header()
+                return False
 
-                if self.user.login(username, password):
-                    break
+            return self.user.login(username, password)
 
-                username = enter_username()
-                # if user chose back
-                if not username:
-                    return
-                
-                password = enter_password()
+        # Render Login UI
+        self.render_page_header(header_message='Login')
 
-                # if user chose back
-                if not password:
-                    return
-                
-                self.user.login(username, password)
-                
-            self.forward('main_menu')
-    
-    def main_menu_page(self):
-        print('This is the Main Menu.')
+        while not self.user.logged_in:
+            if attempt_login():
+                break
+
+        self.forward('main_menu')
     
     def register_page(self):
         print('This is the Register Page.')
+
+    def main_menu_page(self):
+
+        def process_selection():
+            # Get selection
+            while True:
+                selection = input('|- Enter your selection: ')
+                # If register page was selected
+                if selection == '1':
+                    self.forward('account_info')
+                    return
+                # if login page was selected
+                elif selection == '2': 
+                    self.forward('for_sale')
+                    return
+                elif selection == '3': 
+                    self.forward('cart')
+                    return
+                elif selection == '4':
+                    if user.logout():
+                        self.nav_stack = ['initial_page']
+                        self.render_active_page()
+                    return
+                else:
+                    print('|----- Invalid Selection.')
+
+        # Render Main Menu UI
+        self.render_page_header(header_message="Main Menu")
+        print('|----- 1. Account Info')
+        print('|----- 2. For Sale')
+        print('|----- 3. Your Cart')
+        print('|----- 4. Logout')
+        process_selection()
+    
+    def account_info_page(self):
+        print('This is the Account Info Page.')
+    
+    def for_sale_page(self):
+        print('This is the For Sale Page.')
+    
+    def cart_page(self):
+        print('This is the Cart Page.')
+    
 
 def create_database(database_name, user_table_name, cart_table_name, inventory_table_name):
     create_user_database(database_name, user_table_name)
