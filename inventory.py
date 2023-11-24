@@ -5,6 +5,7 @@
 # + viewInventory(): void
 # + searchInventory(): void
 # + decreaseStock(string ISBN): void
+import sqlite3
 
 class Inventory:
     def __init__(self, database_name, table_name):
