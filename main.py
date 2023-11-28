@@ -198,9 +198,6 @@ if __name__ == '__main__':
     user = User(database_name, user_table_name)
     cart = Cart(database_name, cart_table_name)
 
-    # Recreate the user table
-    create_user_database(database_name, user_table_name)
-
     create_database(database_name, user_table_name, cart_table_name, inventory)
 
     menu = Menu(user, cart)
