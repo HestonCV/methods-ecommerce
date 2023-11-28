@@ -170,6 +170,7 @@ class Menu:
         process_selection()
     
     def account_info_page(self):
+        print()
         self.user.view_account_information()
         self.back()
     
