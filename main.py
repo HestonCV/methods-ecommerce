@@ -1,5 +1,6 @@
 from cart import Cart, create_cart_database
 from user import User, create_user_database
+from inventory import Inventory
 # Before Login:            # After Login (Main Menu):
 # ● Login                  # ● Logout
 # ● Create Account         # ● View Account Information
@@ -131,7 +132,9 @@ class Menu:
         self.forward('main_menu')
     
     def register_page(self):
-        print('This is the Register Page.')
+        self.render_page_header(header_message='Register')
+        self.user.create_account()
+        self.back()
 
     def main_menu_page(self):
 
@@ -167,6 +170,7 @@ class Menu:
         process_selection()
     
     def account_info_page(self):
+        self.user.view_account_information()
         print('This is the Account Info Page.')
     
     def for_sale_page(self):
@@ -176,10 +180,10 @@ class Menu:
         print('This is the Cart Page.')
     
 
-def create_database(database_name, user_table_name, cart_table_name, inventory_table_name):
+def create_database(database_name, user_table_name, cart_table_name, inventory):
     create_user_database(database_name, user_table_name)
     create_cart_database(database_name, cart_table_name)
-    # create_inventory_database(database_name, inventory_table_name)
+    inventory.create_inventory_database()
 
 
 if __name__ == '__main__':
@@ -188,10 +192,11 @@ if __name__ == '__main__':
     cart_table_name = 'cart'
     inventory_table_name = 'inventory'
 
-    create_database(database_name, user_table_name, cart_table_name, inventory_table_name)
     
-    #inventory = Inventory(database_name, inventory_table_name)
+    inventory = Inventory(database_name, inventory_table_name)
     user = User(database_name, user_table_name)
     cart = Cart(database_name, cart_table_name)
+    
+    create_database(database_name, user_table_name, cart_table_name, inventory)
 
     menu = Menu(user, cart)
