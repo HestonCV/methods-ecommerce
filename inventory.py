@@ -59,9 +59,12 @@ class Inventory:
         self.cursor.execute(f'UPDATE {self.table_name} SET Stock = ? WHERE ISBN = ?', (new_stock, cart_isbns))
         self.conn.commit()
 
-    def create_inventory_database(self):
+    def create_inventory_database(database_name, table_name):
+        conn = sqlite3.connect(database_name)
+        cursor = conn.cursor()
+
         create_table_query = f"""
-        CREATE TABLE IF NOT EXISTS {self.table_name} (
+        CREATE TABLE IF NOT EXISTS {table_name} (
             Title TEXT PRIMARY KEY,
             Author TEXT,
             Genre TEXT NOT NULL,
@@ -72,6 +75,6 @@ class Inventory:
         );
         """
 
-        self.cursor.execute(create_table_query)
-        self.conn.commit()
-        self.conn.close()
+        cursor.execute(create_table_query)
+        conn.commit()
+        conn.close()
