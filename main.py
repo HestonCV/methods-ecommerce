@@ -197,10 +197,6 @@ if __name__ == '__main__':
     inventory = Inventory(database_name, inventory_table_name)
     user = User(database_name, user_table_name)
     cart = Cart(database_name, cart_table_name)
-    
-    # Drop existing user table
-    user.cursor.execute(f"DROP TABLE IF EXISTS {user_table_name};")
-    user.conn.commit()
 
     # Recreate the user table
     create_user_database(database_name, user_table_name)
