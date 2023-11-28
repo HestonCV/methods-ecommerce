@@ -172,7 +172,6 @@ class Menu:
     def account_info_page(self):
         self.user.view_account_information()
         self.back()
-        print('This is the Account Info Page.')
     
     def for_sale_page(self):
         print('This is the For Sale Page.')
