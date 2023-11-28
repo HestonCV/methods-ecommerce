@@ -171,6 +171,7 @@ class Menu:
     
     def account_info_page(self):
         self.user.view_account_information()
+        self.back()
         print('This is the Account Info Page.')
     
     def for_sale_page(self):
@@ -197,6 +198,13 @@ if __name__ == '__main__':
     user = User(database_name, user_table_name)
     cart = Cart(database_name, cart_table_name)
     
+    # Drop existing user table
+    user.cursor.execute(f"DROP TABLE IF EXISTS {user_table_name};")
+    user.conn.commit()
+
+    # Recreate the user table
+    create_user_database(database_name, user_table_name)
+
     create_database(database_name, user_table_name, cart_table_name, inventory)
 
     menu = Menu(user, cart)
