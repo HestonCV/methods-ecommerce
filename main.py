@@ -115,6 +115,8 @@ class Menu:
 
             while True:
                 selection = input('|- Enter your selection: ')
+                selection = selection.strip().lower()
+                
                 # If register page was selected
                 if selection == '1':
                     self.forward('login')
@@ -123,7 +125,7 @@ class Menu:
                 elif selection == '2': 
                     self.forward('register')
                     return
-                elif selection == 'X' or selection == 'x':
+                elif selection == 'x':
                     return
                 else:
                     print('|----- Invalid Selection.')
@@ -177,6 +179,8 @@ class Menu:
             # Get selection
             while True:
                 selection = input('|- Enter your selection: ')
+                selection = selection.strip().lower()
+
                 # If register page was selected
                 if selection == '1':
                     self.forward('account_info')
@@ -188,7 +192,7 @@ class Menu:
                 elif selection == '3': 
                     self.forward('cart')
                     return
-                elif selection.strip().lower() == 'b':
+                elif selection == 'b':
                     if user.logout():
                         self.nav_stack = ['initial_page']
                         self.render_active_page()
@@ -223,10 +227,12 @@ class Menu:
                 print('|- Database Error.')
             
             print('|')
+
         def process_selection():
             # Get selection
             while True:
                 selection = input('|- Enter your selection: ')
+                selection = selection.strip().lower()
 
                 if selection == 'b':
                     self.back()
@@ -244,6 +250,7 @@ class Menu:
             # Get selection
             while True:
                 selection = input('|- Enter your selection: ')
+                selection = selection.strip().lower()
                 # If register page was selected
                 if selection == '1': 
                     self.forward('add_to_cart')
