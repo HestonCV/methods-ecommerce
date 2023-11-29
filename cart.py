@@ -46,11 +46,11 @@ class Cart:
             self.cursor.execute(query, isbns)
             books = self.cursor.fetchall()
 
-            titles = [book[1] for book in books]
-            authors = [book[2] for book in books]
-            genres = [book[3] for book in books]
-            pages = [book[4] for book in books]
-            release_dates = [book[5] for book in books]
+            titles = [book[0] for book in books]
+            authors = [book[1] for book in books]
+            genres = [book[2] for book in books]
+            pages = [book[3] for book in books]
+            release_dates = [book[4] for book in books]
 
         else:
             empty = True

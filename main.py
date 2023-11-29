@@ -62,11 +62,30 @@ class Menu:
             'main_menu': self.main_menu_page,
             'account_info': self.account_info_page,
             'for_sale': self.for_sale_page,
-            'cart': self.cart_page
+            'cart': self.cart_page,
+            'add_to_cart': self.add_to_cart_page,
         }
         # Render page from top of stack
         active_page = self.nav_stack[-1]
         pages[active_page]()
+
+    def display_inventory(self):
+        items = self.inventory.view_inventory()
+
+        if items['empty']:
+            print('|')
+            print('|--Inventory Is Empty.')
+        
+        else:
+            items_in_inventory = len(items['titles'])
+
+            print('|--Items In Inventory:', items_in_inventory)
+            print('|')
+            for i in range(items_in_inventory):
+                print(f'|--| Stock: {items["stock"][i]} | ISBN: {items["isbns"][i]} | Title: {items["titles"][i]} | Author: {items["authors"][i]} | Genre: {items["genres"][i]} | Pages: {items["pages"][i]} |  Release Date: {items["release_dates"][i]} |')
+        print('|')
+        
+        return
     
     def initial_page(self):
         
@@ -170,23 +189,6 @@ class Menu:
         self.back()
     
     def for_sale_page(self):
-        def display_inventory():
-            items = self.inventory.view_inventory()
-
-            if items['empty']:
-                print('|')
-                print('|--Inventory Is Empty.')
-            
-            else:
-                items_in_inventory = len(items['titles'])
-
-                print('|--Items In Inventory:', items_in_inventory)
-                print('|')
-                for i in range(items_in_inventory):
-                    print(f'|--| Stock: {items["stock"][i]} | ISBN: {items["isbns"][i]} | Title: {items["titles"][i]} | Author: {items["authors"][i]} | Genre: {items["genres"][i]} | Pages: {items["pages"][i]} |  Release Date: {items["release_dates"][i]} |')
-            print('|')
-            
-            return
         
         def process_selection():
             # Get selection
@@ -194,7 +196,7 @@ class Menu:
                 selection = input('|- Enter your selection: ')
                 # If register page was selected
                 if selection == '1': 
-                    self.forward('add_item_cart')
+                    self.forward('add_to_cart')
                     return
                 elif selection == '2': 
                     self.forward('search_inventory')
@@ -206,7 +208,7 @@ class Menu:
                     print('|----- Invalid Selection.')
 
         self.render_page_header(header_message='Inventory')
-        display_inventory()
+        self.display_inventory()
         print('|----- 1. Add Item To Cart')
         print('|----- 2. Search Inventory')
         process_selection()
@@ -238,10 +240,10 @@ class Menu:
                 selection = input('|- Enter your selection: ')
                 # If register page was selected
                 if selection == '1': 
-                    self.forward('add_item_cart')
+                    self.forward('add_to_cart')
                     return
                 elif selection == '2': 
-                    self.forward('remove_item_cart')
+                    self.forward('remove_from_cart')
                     return
                 elif selection == '3':
                     self.forward('check_out')
@@ -251,12 +253,36 @@ class Menu:
                     return
                 else:
                     print('|----- Invalid Selection.')
+
         self.render_page_header(header_message="Cart")
         display_cart()
         print('|----- 1. Add Item To Cart')
         print('|----- 2. Remove Item From Cart')
         print('|----- 3. Check Out')
         process_selection()
+
+    def add_to_cart_page(self):
+        def process_selection():
+            # Get selection
+            while True:
+                selection = input('|- Enter an ISBN: ')\
+                
+                # If user wants to go back
+                if selection == 'b':
+                    self.back()
+                    return
+                
+                # Add item to cart
+                success = self.cart.add_to_cart(self.user.user_id, selection)
+                if success:
+                    print('|----- Item Added To Cart.')
+                else:
+                    print('|----- Invalid Selection.')
+
+        self.render_page_header(header_message='Add To Cart')
+        self.display_inventory()
+        process_selection()
+
     
 
 def create_database(database_name, user_table_name, cart_table_name, inventory_table_name):
@@ -311,8 +337,5 @@ if __name__ == '__main__':
     cart = Cart(database_name, cart_table_name)
 
     create_database(database_name, user_table_name, cart_table_name, inventory_table_name)
-
-    add_books_to_inventory()
-    cart.add_to_cart(1, 9780451524935)
 
     menu = Menu(user, cart, inventory)

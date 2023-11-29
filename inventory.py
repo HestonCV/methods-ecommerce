@@ -39,18 +39,6 @@ class Inventory:
                 'isbns': isbns
             }
 
-        else:
-            print("Inventory is empty.\n")
-
-        return {
-        'stock': stock,
-        'titles': titles,
-        'authors': authors,
-        'genres': genres,
-        'pages': pages,
-        'release_dates': release_dates
-        }
-
     def search_Inventory(self):
         print("What category would you like to search by?\n1. Titles\n2. Authors\n3. Genres")
         selection = int(input())
