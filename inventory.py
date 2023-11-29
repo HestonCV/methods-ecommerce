@@ -19,12 +19,28 @@ class Inventory:
         items_in_inventory = self.cursor.fetchall()
 
         if items_in_inventory:
-            titles, authors, genres, pages, release_dates, stock = zip(*items_in_inventory)
+
+            titles = [book[0] for book in items_in_inventory]
+            authors = [book[1] for book in items_in_inventory]
+            genres = [book[2] for book in items_in_inventory]
+            pages = [book[3] for book in items_in_inventory]
+            release_dates = [book[4] for book in items_in_inventory]
+            stock = [book[5] for book in items_in_inventory]
+
             print("----------Full Inventory----------\n")
             print("-TITLE--AUTHOR--GENRE--PAGES--RELEASE DATE--QUANTITY-\n\n")
-            print(titles, ", ", authors, ", ", genres, ", ", pages, ", ", release_dates, ", ", stock, "\n")
+            print(titles, ", \n", authors, ", \n", genres, ", \n", pages, ", \n", release_dates, ", \n", stock, "\n")
         else:
             print("Inventory is empty.\n")
+
+        return {
+        'stock': stock,
+        'titles': titles,
+        'authors': authors,
+        'genres': genres,
+        'pages': pages,
+        'release_dates': release_dates
+        }
 
     def search_Inventory(self):
         print("What category would you like to search by?\n1. Titles\n2. Authors\n3. Genres")
@@ -44,11 +60,27 @@ class Inventory:
         result = self.cursor.fetchall()
 
         if result:
-            titles, authors, genres, pages, release_dates, stock = zip(*result)
+            titles = [book[0] for book in result]
+            authors = [book[1] for book in result]
+            genres = [book[2] for book in result]
+            pages = [book[3] for book in result]
+            release_dates = [book[4] for book in result]
+            stock = [book[5] for book in result]
+
             print(f"Results for Books with the {search_field.lower()} {search_value}:\n")
             print(titles, ", ", authors, ", ", genres, ", ", pages, ", ", release_dates, ", ", stock, "\n")
         else:
             print(f"No results found for {search_field.lower()} {search_value}.\n")
+        
+        return {
+        'stock': stock,
+        'titles': titles,
+        'authors': authors,
+        'genres': genres,
+        'pages': pages,
+        'release_dates': release_dates
+        }
+
 
     def decrease_Stock(self, ISBN, cart_isbns, cart_quantity):
         self.cursor.execute(f'SELECT Stock FROM {self.table_name} WHERE Isbn = ?', (cart_isbns,))
