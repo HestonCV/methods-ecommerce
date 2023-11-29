@@ -46,6 +46,7 @@ class Menu:
             return
         
         if self.nav_stack[-1] == 'main_menu':
+            print('|(B/b) -> Logout')
             return
         
         if len(self.nav_stack) > 1:
@@ -187,7 +188,7 @@ class Menu:
                 elif selection == '3': 
                     self.forward('cart')
                     return
-                elif selection == '4':
+                elif selection.strip().lower() == 'b':
                     if user.logout():
                         self.nav_stack = ['initial_page']
                         self.render_active_page()
@@ -200,13 +201,42 @@ class Menu:
         print('|----- 1. Account Info')
         print('|----- 2. For Sale')
         print('|----- 3. Your Cart')
-        print('|----- 4. Logout')
         process_selection()
     
     def account_info_page(self):
-        print()
-        self.user.view_account_information()
-        self.back()
+        def display_user_information():
+            user_info = self.user.view_account_information()
+            
+            print('|')
+            if user_info:
+                print(f"|- User ID: {user_info['user_id']}")
+                print(f"|- Username: {user_info['username']}")
+                print(f"|- Email: {user_info['email']}")
+                print(f"|- Name: {user_info['first_name']} {user_info['last_name']}")
+                print(f"|- Address: {user_info['address']}")
+                print(f"|- City: {user_info['city']}")
+                print(f"|- State: {user_info['state']}")
+                print(f"|- Zip: {user_info['zip']}")
+                print(f"|- Payment: {user_info['payment']}")
+                
+            else:
+                print('|- Database Error.')
+            
+            print('|')
+        def process_selection():
+            # Get selection
+            while True:
+                selection = input('|- Enter your selection: ')
+
+                if selection == 'b':
+                    self.back()
+                    return
+                else:
+                    print('|----- Invalid Selection.')
+
+        self.render_page_header(header_message='Account Information')
+        display_user_information()
+        process_selection()
     
     def for_sale_page(self):
         

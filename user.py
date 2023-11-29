@@ -54,25 +54,38 @@ class User:
         return True
 
     def view_account_information(self):
-        if not self.logged_in:
-            print("You need to log in to view account information.")
-            return
-
         # Implement SQL query to fetch and display the user's account information
         self.cursor.execute(f"SELECT * FROM {self.table_name} WHERE user_id=?", (self.user_id,))
         user = self.cursor.fetchone()
-        print("Account Information:")
-        print(f"User ID: {user[0]}")
-        print(f"Username: {user[1]}")
-        print(f"Email: {user[3]}")
-        #new stuff
-        print(f"FirstName: {user[4]}")
-        print(f"LastName: {user[5]}")
-        print(f"Address: {user[6]}")
-        print(f"City: {user[7]}")
-        print(f"State: {user[8]}")
-        print(f"Zip: {user[9]}")
-        print(f"Payment: {user[10]}")
+
+        if user:
+            user_id = user[0]
+            username = user[1]
+            email = user[3]
+            first_name = user[4]
+            last_name = user[5]
+            address = user[6]
+            city = user[7]
+            state = user[8]
+            zip = user[9]
+            payment = user[10]
+
+            return {
+                'user_id': user_id,
+                'username': username,
+                'email': email,
+                'first_name': first_name,
+                'last_name': last_name,
+                'address': address,
+                'city': city,
+                'state': state,
+                'zip': zip,
+                'payment': payment
+            }
+        
+        else:
+            return False
+
 
     def create_account(self):
         if self.logged_in:
