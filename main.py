@@ -170,11 +170,48 @@ class Menu:
         self.back()
     
     def for_sale_page(self):
-        self.inventory.view_Inventory()
-        self.inventory.search_Inventory()
-        self.back()
+        def display_inventory():
+            items = self.inventory.view_inventory()
+
+            if items['empty']:
+                print('|')
+                print('|--Inventory Is Empty.')
+            
+            else:
+                items_in_inventory = len(items['titles'])
+
+                print('|--Items In Inventory:', items_in_inventory)
+                print('|')
+                for i in range(items_in_inventory):
+                    print(f'|--| Stock: {items["stock"][i]} | ISBN: {items["isbns"][i]} | Title: {items["titles"][i]} | Author: {items["authors"][i]} | Genre: {items["genres"][i]} | Pages: {items["pages"][i]} |  Release Date: {items["release_dates"][i]} |')
+            print('|')
+            
+            return
+        
+        def process_selection():
+            # Get selection
+            while True:
+                selection = input('|- Enter your selection: ')
+                # If register page was selected
+                if selection == '1': 
+                    self.forward('add_item_cart')
+                    return
+                elif selection == '2': 
+                    self.forward('search_inventory')
+                    return
+                elif selection == 'b':
+                    self.back()
+                    return
+                else:
+                    print('|----- Invalid Selection.')
+
+        self.render_page_header(header_message='Inventory')
+        display_inventory()
+        print('|----- 1. Add Item To Cart')
+        print('|----- 2. Search Inventory')
+        process_selection()
     
-        # Cart Pages Start
+    # Cart Pages Start
     def cart_page(self):
 
         def display_cart():

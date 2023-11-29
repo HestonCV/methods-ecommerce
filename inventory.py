@@ -14,7 +14,7 @@ class Inventory:
         self.conn = sqlite3.connect(self.database_name)
         self.cursor = self.conn.cursor()
 
-    def view_Inventory(self):
+    def view_inventory(self):
         self.cursor.execute(f'SELECT * FROM {self.table_name}')
         items_in_inventory = self.cursor.fetchall()
 
@@ -26,10 +26,19 @@ class Inventory:
             pages = [book[3] for book in items_in_inventory]
             release_dates = [book[4] for book in items_in_inventory]
             stock = [book[5] for book in items_in_inventory]
+            isbns = [book[6] for book in items_in_inventory]
 
-            print("----------Full Inventory----------\n")
-            print("-TITLE--AUTHOR--GENRE--PAGES--RELEASE DATE--QUANTITY-\n\n")
-            print(titles, ", \n", authors, ", \n", genres, ", \n", pages, ", \n", release_dates, ", \n", stock, "\n")
+            return {
+                'empty': len(titles) == 0,
+                'titles': titles,
+                'authors': authors,
+                'genres': genres,
+                'pages': pages,
+                'release_dates': release_dates,
+                'stock': stock,
+                'isbns': isbns
+            }
+
         else:
             print("Inventory is empty.\n")
 
