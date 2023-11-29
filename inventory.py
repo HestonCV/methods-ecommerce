@@ -4,7 +4,7 @@
 # + Inventory(string databaseName, string tableName)
 # + viewInventory(): void
 # + searchInventory(): void
-# + decreaseStock(string ISBN): void
+# + editStock(string ISBN): void
 import sqlite3
 
 class Inventory:
@@ -59,22 +59,23 @@ class Inventory:
         self.cursor.execute(f'UPDATE {self.table_name} SET Stock = ? WHERE ISBN = ?', (new_stock, cart_isbns))
         self.conn.commit()
 
-    def create_inventory_database(database_name, table_name):
-        conn = sqlite3.connect(database_name)
-        cursor = conn.cursor()
 
-        create_table_query = f"""
+def create_inventory_database(database_name, table_name):
+    conn = sqlite3.connect(database_name)
+    cursor = conn.cursor()
+
+    create_table_query = f"""
         CREATE TABLE IF NOT EXISTS {table_name} (
-            Title TEXT PRIMARY KEY,
-            Author TEXT,
-            Genre TEXT NOT NULL,
-            Pages INTEGER NOT NULL,
-            Release_date TEXT,
-            Stock INT NOT NULL,
-            Isbn INT NOT NULL
+        Title TEXT PRIMARY KEY,
+        Author TEXT,
+        Genre TEXT NOT NULL,
+        Pages INTEGER NOT NULL,
+        Release_date TEXT,
+        Stock INT NOT NULL,
+        Isbn INT NOT NULL
         );
         """
 
-        cursor.execute(create_table_query)
-        conn.commit()
-        conn.close()
+    cursor.execute(create_table_query)
+    conn.commit()
+    conn.close()
