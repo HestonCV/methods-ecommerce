@@ -64,7 +64,9 @@ class Menu:
             'for_sale': self.for_sale_page,
             'cart': self.cart_page,
             'add_to_cart': self.add_to_cart_page,
+            'remove_from_cart': self.remove_from_cart_page,
         }
+        print('\n\n----------------------------------------\n')
         # Render page from top of stack
         active_page = self.nav_stack[-1]
         pages[active_page]()
@@ -74,15 +76,33 @@ class Menu:
 
         if items['empty']:
             print('|')
-            print('|--Inventory Is Empty.')
+            print('|-- Inventory Is Empty.')
         
         else:
             items_in_inventory = len(items['titles'])
 
-            print('|--Items In Inventory:', items_in_inventory)
+            print('|-- Items In Inventory:', items_in_inventory)
             print('|')
             for i in range(items_in_inventory):
-                print(f'|--| Stock: {items["stock"][i]} | ISBN: {items["isbns"][i]} | Title: {items["titles"][i]} | Author: {items["authors"][i]} | Genre: {items["genres"][i]} | Pages: {items["pages"][i]} |  Release Date: {items["release_dates"][i]} |')
+                print(f'|-- | Stock: {items["stock"][i]} | ISBN: {items["isbns"][i]} | Title: {items["titles"][i]} | Author: {items["authors"][i]} | Genre: {items["genres"][i]} | Pages: {items["pages"][i]} |  Release Date: {items["release_dates"][i]} |')
+        print('|')
+        
+        return
+    
+    def display_cart(self):
+        items = self.cart.view_cart(self.user.getUserID(), inventory.table_name)
+        
+        if items['empty']:
+            print('|')
+            print('|-- Your Cart Is Empty.')
+        
+        else:
+            items_in_cart = sum(items['quantities'])
+
+            print('|-- Items In Cart:', items_in_cart)
+            print('|')
+            for i in range(len(items['titles'])):
+                print(f'|-- | Qty: {items["quantities"][i]} | ISBN: {items["isbns"][i]} | Title: {items["titles"][i]} | Author: {items["authors"][i]} | Genre: {items["genres"][i]} | Pages: {items["pages"][i]} |  Release Date: {items["release_dates"][i]} |')
         print('|')
         
         return
@@ -216,24 +236,6 @@ class Menu:
     # Cart Pages Start
     def cart_page(self):
 
-        def display_cart():
-            items = self.cart.view_cart(self.user.getUserID(), inventory.table_name)
-            
-            if items['empty']:
-                print('|')
-                print('|--Your Cart Is Empty.')
-            
-            else:
-                items_in_cart = sum(items['quantities'])
-
-                print('|--Items In Cart:', items_in_cart)
-                print('|')
-                for i in range(len(items['titles'])):
-                    print(f'|--| Qty: {items["quantities"][i]} | ISBN: {items["isbns"][i]} | Title: {items["titles"][i]} | Author: {items["authors"][i]} | Genre: {items["genres"][i]} | Pages: {items["pages"][i]} |  Release Date: {items["release_dates"][i]} |')
-            print('|')
-            
-            return
-
         def process_selection():
             # Get selection
             while True:
@@ -255,7 +257,7 @@ class Menu:
                     print('|----- Invalid Selection.')
 
         self.render_page_header(header_message="Cart")
-        display_cart()
+        self.display_cart()
         print('|----- 1. Add Item To Cart')
         print('|----- 2. Remove Item From Cart')
         print('|----- 3. Check Out')
@@ -265,7 +267,7 @@ class Menu:
         def process_selection():
             # Get selection
             while True:
-                selection = input('|- Enter an ISBN: ')\
+                selection = input('|- Enter An ISBN To Add: ')\
                 
                 # If user wants to go back
                 if selection == 'b':
@@ -281,6 +283,28 @@ class Menu:
 
         self.render_page_header(header_message='Add To Cart')
         self.display_inventory()
+        process_selection()
+    
+    def remove_from_cart_page(self):
+        def process_selection():
+            # Get selection
+            while True:
+                selection = input('|- Enter An ISBN To Remove: ')\
+                
+                # If user wants to go back
+                if selection == 'b':
+                    self.back()
+                    return
+                
+                # Add item to cart
+                success = self.cart.remove_from_cart(self.user.user_id, selection)
+                if success:
+                    print('|----- Item Removed From Cart.')
+                else:
+                    print('|----- Invalid Selection.')
+
+        self.render_page_header(header_message='Remove From Cart')
+        self.display_cart()
         process_selection()
 
     
