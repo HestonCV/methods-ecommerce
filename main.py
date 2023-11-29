@@ -104,11 +104,6 @@ class Menu:
                     self.back()
                     return None
 
-                # Check if credential is too short
-                if len(credential) < 4:
-                    print(f'|----- {credential_type.capitalize()} is too short.')
-                    continue
-
                 return credential
 
         def attempt_login():
@@ -179,14 +174,92 @@ class Menu:
         self.inventory.search_Inventory()
         self.back()
     
+        # Cart Pages Start
     def cart_page(self):
-        print('This is the Cart Page.')
+
+        def display_cart():
+            items = self.cart.view_cart(self.user.getUserID(), inventory.table_name)
+            
+            if items['empty']:
+                print('|')
+                print('|--Your Cart Is Empty.')
+            
+            else:
+                items_in_cart = sum(items['quantities'])
+
+                print('|--Items In Cart:', items_in_cart)
+                print('|')
+                for i in range(len(items['titles'])):
+                    print(f'|--| Qty: {items["quantities"][i]} | ISBN: {items["isbns"][i]} | Title: {items["titles"][i]} | Author: {items["authors"][i]} | Genre: {items["genres"][i]} | Pages: {items["pages"][i]} |  Release Date: {items["release_dates"][i]} |')
+            print('|')
+            
+            return
+
+        def process_selection():
+            # Get selection
+            while True:
+                selection = input('|- Enter your selection: ')
+                # If register page was selected
+                if selection == '1': 
+                    self.forward('add_item_cart')
+                    return
+                elif selection == '2': 
+                    self.forward('remove_item_cart')
+                    return
+                elif selection == '3':
+                    self.forward('check_out')
+                    return
+                elif selection == 'b':
+                    self.back()
+                    return
+                else:
+                    print('|----- Invalid Selection.')
+        self.render_page_header(header_message="Cart")
+        display_cart()
+        print('|----- 1. Add Item To Cart')
+        print('|----- 2. Remove Item From Cart')
+        print('|----- 3. Check Out')
+        process_selection()
     
 
 def create_database(database_name, user_table_name, cart_table_name, inventory_table_name):
     create_user_database(database_name, user_table_name)
     create_cart_database(database_name, cart_table_name)
     create_inventory_database(database_name, inventory_table_name)
+
+import sqlite3
+
+def add_books_to_inventory():
+    # Database connection
+    database_name = 'ecommerce_database.db'
+    conn = sqlite3.connect(database_name)
+    cursor = conn.cursor()
+
+    # List of books to add
+    books = [
+        ("To Kill a Mockingbird", "Harper Lee", "Classic", 281, "1960-07-11", 10, 9780061120084),
+        ("1984", "George Orwell", "Dystopian", 328, "1949-06-08", 15, 9780451524935),
+        ("The Great Gatsby", "F. Scott Fitzgerald", "Classic", 180, "1925-04-10", 12, 9780743273565),
+        ("The Catcher in the Rye", "J.D. Salinger", "Literary Fiction", 234, "1951-07-16", 10, 9780316769488),
+        ("Pride and Prejudice", "Jane Austen", "Romance", 432, "1813-01-28", 14, 9780679783268)
+    ]
+
+    # SQL query to insert a book
+    insert_query = """
+    INSERT INTO inventory (Title, Author, Genre, Pages, Release_date, Stock, Isbn)
+    VALUES (?, ?, ?, ?, ?, ?, ?)
+    """
+
+    # Insert each book
+    for book in books:
+        try:
+            cursor.execute(insert_query, book)
+        except sqlite3.IntegrityError:
+            print(f"Book with ISBN {book[-1]} already exists in the database.")
+    
+    # Commit changes and close connection
+    conn.commit()
+    conn.close()
 
 
 if __name__ == '__main__':
@@ -200,6 +273,9 @@ if __name__ == '__main__':
     user = User(database_name, user_table_name)
     cart = Cart(database_name, cart_table_name)
 
-    create_database(database_name, user_table_name, cart_table_name, inventory)
+    create_database(database_name, user_table_name, cart_table_name, inventory_table_name)
 
-    menu = Menu(user, cart)
+    add_books_to_inventory()
+    cart.add_to_cart(1, 9780451524935)
+
+    menu = Menu(user, cart, inventory)
