@@ -46,12 +46,12 @@ class Inventory:
 
         if book:
             return {
-                'stock': book[0],
-                'title': book[1],
-                'author': book[2],
-                'genre': book[3],
-                'page': book[4],
-                'release_date': book[5],
+                'title': book[0],
+                'author': book[1],
+                'genre': book[2],
+                'page': book[3],
+                'release_date': book[4],
+                'stock': book[5],
                 'isbn': book[6],
             }
         
