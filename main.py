@@ -40,21 +40,21 @@ class Menu:
 
         print(f'\nCongo {header_message}')
         print('|-------------------------')
-
-        if self.nav_stack[-1] == 'initial_page':
-            print('|(X/x) -> Quit')
-            return
-        
-        if self.nav_stack[-1] == 'main_menu':
-            print('|(B/b) -> Logout')
-            return
-        
-        if self.nav_stack[-1] == 'check_out':
-            return
-        
-        if len(self.nav_stack) > 1:
-            print('|(B/b) -> Back')
-            return
+        if len(self.nav_stack) > 0:
+            if self.nav_stack[-1] == 'initial_page':
+                print('|(X/x) -> Quit')
+                return
+            
+            if self.nav_stack[-1] == 'main_menu':
+                print('|(B/b) -> Logout')
+                return
+            
+            if self.nav_stack[-1] == 'check_out':
+                return
+            
+            if len(self.nav_stack) > 1:
+                print('|(B/b) -> Back')
+                return
         
     
     def render_active_page(self):
@@ -70,12 +70,15 @@ class Menu:
             'cart': self.cart_page,
             'add_to_cart': self.add_to_cart_page,
             'remove_from_cart': self.remove_from_cart_page,
-            'check_out': self.check_out_page,
         }
+
         print('\n\n----------------------------------------\n')
         # Render page from top of stack
-        active_page = self.nav_stack[-1]
-        pages[active_page]()
+        if len(self.nav_stack) > 0:
+            active_page = self.nav_stack[-1]
+            pages[active_page]()
+        else:
+            return
 
     def display_inventory(self):
         items = self.inventory.view_inventory()
@@ -172,6 +175,7 @@ class Menu:
                 break
 
         self.forward('main_menu')
+        return
     
     def register_page(self):
         self.render_page_header(header_message='Register')
@@ -376,10 +380,6 @@ class Menu:
         self.display_cart()
         process_selection()
     
-    def check_out_page(self):
-        pass
-
-    
 
 def create_database(database_name, user_table_name, cart_table_name, inventory_table_name):
     create_user_database(database_name, user_table_name)
@@ -433,5 +433,7 @@ if __name__ == '__main__':
     cart = Cart(database_name, cart_table_name)
 
     create_database(database_name, user_table_name, cart_table_name, inventory_table_name)
+
+    add_books_to_inventory()
 
     menu = Menu(user, cart, inventory)
