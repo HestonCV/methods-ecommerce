@@ -129,30 +129,33 @@ class Cart:
         else:
             return False
 
-    def check_out(self, user_id):
+    def check_out(self, inventory, user_id):
         '''
             this removes all their cart items. It also
             calls the Inventory class function to decrease the stock of the books by the correct
             amount the user bought (prior to removing them from the cart)
         '''
         query = 'SELECT isbn, quantity FROM {} WHERE user_id=? AND quantity>0'.format(self.table_name)
-        self.cursor.execute(query, user_id)
+        self.cursor.execute(query, (user_id,))
 
         items = self.cursor.fetchall()
+        
 
         if items:
+            isbns = [item[0] for item in items]
+            quantities = [item[1] for item in items]
+
             for item in items:
                 isbn = item[0]
-                quantity = item[1]
-                #inventory.decrease_stock(isbn, quantity)
                 delete_query = 'DELETE FROM {} WHERE isbn=? and user_id=?'.format(self.table_name)
-                self.cursor.execute(delete_query, isbn, user_id)
-                self.conn.commit()
+                self.cursor.execute(delete_query, (isbn, user_id))
 
-                return True
+            self.conn.commit()
+            inventory.decrease_stock(isbns, quantities)
+
+            return sum(quantities)
         else: 
             return False
-
 
 
 

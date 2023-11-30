@@ -49,6 +49,9 @@ class Menu:
             print('|(B/b) -> Logout')
             return
         
+        if self.nav_stack[-1] == 'check_out':
+            return
+        
         if len(self.nav_stack) > 1:
             print('|(B/b) -> Back')
             return
@@ -63,9 +66,11 @@ class Menu:
             'main_menu': self.main_menu_page,
             'account_info': self.account_info_page,
             'for_sale': self.for_sale_page,
+            'search_inventory': self.search_inventory_page,
             'cart': self.cart_page,
             'add_to_cart': self.add_to_cart_page,
             'remove_from_cart': self.remove_from_cart_page,
+            'check_out': self.check_out_page,
         }
         print('\n\n----------------------------------------\n')
         # Render page from top of stack
@@ -269,6 +274,30 @@ class Menu:
         print('|----- 1. Add Item To Cart')
         print('|----- 2. Search Inventory')
         process_selection()
+
+    def search_inventory_page(self):
+        def process_selection():
+            # Get selection
+            while True:
+                selection = input('|- Enter A Book Title: ')
+
+                if selection == 'b':
+                    self.back()
+                    return
+                else:
+                    book = self.inventory.search_inventory(selection)
+                    print('|')
+                    if book:
+                        print('|-- Result')
+                        print(f'|-- | Stock: {book["stock"]} | ISBN: {book["isbn"]} | Title: {book["title"]} | Author: {book["author"]} | Genre: {book["genre"]} | Pages: {book["page"]} |  Release Date: {book["release_date"]} |')
+                    else:
+                        print(f"|-- No Result For Title: '{selection}'")
+                    
+                    print('|')
+
+        self.render_page_header(header_message='Inventory Search')
+        process_selection()
+        self.back()
     
     # Cart Pages Start
     def cart_page(self):
@@ -281,12 +310,15 @@ class Menu:
                 if selection == '1': 
                     self.forward('add_to_cart')
                     return
-                elif selection == '2': 
+                elif selection == '2':
                     self.forward('remove_from_cart')
                     return
                 elif selection == '3':
-                    self.forward('check_out')
-                    return
+                    quantity = self.cart.check_out(self.inventory, self.user.user_id)
+                    if quantity:
+                        print(f'|- {quantity} Items Purchased')
+                    else:
+                        print('|- Cannot Check Out Empty Cart')
                 elif selection == 'b':
                     self.back()
                     return
@@ -343,6 +375,9 @@ class Menu:
         self.render_page_header(header_message='Remove From Cart')
         self.display_cart()
         process_selection()
+    
+    def check_out_page(self):
+        pass
 
     
 

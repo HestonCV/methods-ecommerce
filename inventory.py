@@ -39,53 +39,48 @@ class Inventory:
                 'isbns': isbns
             }
 
-    def search_Inventory(self):
-        print("What category would you like to search by?\n1. Titles\n2. Authors\n3. Genres")
-        selection = int(input())
+    def search_inventory(self, title):
 
-        search_fields = ['TITLE', 'AUTHOR', 'GENRE']
-        if 1 <= selection <= 3:
-            search_field = search_fields[selection - 1]
-        else:
-            print("Invalid selection.")
-            return
+        self.cursor.execute(f"SELECT * FROM {self.table_name} WHERE TITLE LIKE ?", (title,))
+        book = self.cursor.fetchone()
 
-        print("Search for:")
-        search_value = input()
-
-        self.cursor.execute(f"SELECT * FROM {self.table_name} WHERE {search_field} LIKE ?", (search_value,))
-        result = self.cursor.fetchall()
-
-        if result:
-            titles = [book[0] for book in result]
-            authors = [book[1] for book in result]
-            genres = [book[2] for book in result]
-            pages = [book[3] for book in result]
-            release_dates = [book[4] for book in result]
-            stock = [book[5] for book in result]
-
-            print(f"Results for Books with the {search_field.lower()} {search_value}:\n")
-            print(titles, ", ", authors, ", ", genres, ", ", pages, ", ", release_dates, ", ", stock, "\n")
-        else:
-            print(f"No results found for {search_field.lower()} {search_value}.\n")
+        if book:
+            return {
+                'stock': book[0],
+                'title': book[1],
+                'author': book[2],
+                'genre': book[3],
+                'page': book[4],
+                'release_date': book[5],
+                'isbn': book[6],
+            }
         
-        return {
-        'stock': stock,
-        'titles': titles,
-        'authors': authors,
-        'genres': genres,
-        'pages': pages,
-        'release_dates': release_dates
-        }
+        else: 
+            return False
+        
 
+    def decrease_stock(self, cart_isbns, cart_quantities):
+        
+        if len(cart_isbns) != len(cart_quantities):
+            return False
 
-    def decrease_Stock(self, ISBN, cart_isbns, cart_quantity):
-        self.cursor.execute(f'SELECT Stock FROM {self.table_name} WHERE Isbn = ?', (cart_isbns,))
-        old_stock = self.cursor.fetchone()[0]
+        for isbn, quantity in zip(cart_isbns, cart_quantities):
+            # Fetch the current stock for each ISBN
+            self.cursor.execute(f'SELECT stock FROM {self.table_name} WHERE isbn = ?', (isbn,))
+            result = self.cursor.fetchone()
+            if result is None:
+                return False
+            
+            old_stock = result[0]
 
-        new_stock = old_stock - cart_quantity
+            # Calculate new stock
+            new_stock = old_stock - quantity
 
-        self.cursor.execute(f'UPDATE {self.table_name} SET Stock = ? WHERE ISBN = ?', (new_stock, cart_isbns))
+            if new_stock < 0:
+                return False
+
+            self.cursor.execute(f'UPDATE {self.table_name} SET Stock = ? WHERE ISBN = ?', (new_stock, isbn))
+
         self.conn.commit()
 
 
