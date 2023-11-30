@@ -92,17 +92,17 @@ class User:
             print("You are already logged in. Please log out before creating a new account.")
             return
 
-        username = input("Enter a new username: ")
-        password = input("Enter a new password: ")
-        email = input("Enter your email address: ")
+        username = input("|- Enter a new username: ")
+        password = input("|- Enter a new password: ")
+        email = input("|- Enter your email address: ")
         #new stuff
-        first_name = input("Enter your first name: ")
-        last_name = input("Enter your last name: ")
-        address = input("Enter your address: ")
-        city = input("Enter your city: ")
-        state = input("Enter your state: ")
-        zip_code = input("Enter your ZIP code: ")
-        payment = input("Enter your payment information: ")
+        first_name = input("|- Enter your first name: ")
+        last_name = input("|- Enter your last name: ")
+        address = input("|- Enter your address: ")
+        city = input("|- Enter your city: ")
+        state = input("|- Enter your state: ")
+        zip_code = input("|- Enter your ZIP code: ")
+        payment = input("|- Enter your payment information: ")
 
         # Implement SQL query to insert a new user into the database
         self.cursor.execute("INSERT INTO {} (username, password, email, first_name, last_name, address, city, state, zip, payment) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)".format(self.table_name),
